@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jumping Capybara</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    body {
+      text-align: center;
+      background: linear-gradient(#1e3c72, #2a5298);
+      font-family: "Segoe UI", sans-serif;
+      color: #fff;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .game-wrap {
+      margin: 20px auto;
+      width: 800px;
+      max-width: 95vw;
+    }
+
+    /* World background */
+    .world {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(#c9eaff 70%, #9fd89f 30%);
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    /* Sun */
+    .sun {
+      position: absolute;
+      top: 30px;
+      right: 60px;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 30% 30%, #fffde0, #ffd93b);
+      border-radius: 50%;
+      box-shadow: 0 0 30px rgba(255,217,59,0.8);
+    }
+
+    /* Clouds */
+    .cloud {
+      position: absolute;
+      top: 40px;
+      width: 80px;
+      height: 40px;
+      background: #fff;
+      border-radius: 40px;
+      filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.1));
+      animation: cloudMove 60s linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: "";
+      position: absolute;
+      background: #fff;
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      top: -20px;
+    }
+    .cloud::before { left: -25px; }
+    .cloud::after { left: 45px; }
+
+    @keyframes cloudMove {
+      from { left: -120px; }
+      to { left: 100%; }
+    }
+
+    /* Mountains */
+    .mountains {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(to top, #556b2f, transparent);
+      clip-path: polygon(0 100%, 10% 40%, 20% 100%, 35% 30%, 50% 100%, 65% 35%, 80% 100%, 90% 45%, 100% 100%);
+      opacity: 0.5;
+    }
+
+    /* Ground stripes (animated) */
+    .track {
+      position: absolute;
+      left: 0; right: 0; bottom: 42px;
+      height: 8px;
+      background: repeating-linear-gradient(
+        to right,
+        #739c5f,
+        #739c5f 20px,
+        #628952 20px,
+        #628952 40px
+      );
+      background-position: 0 0;
+      animation: trackMove 1s linear infinite;
+    }
+
+    @keyframes trackMove {
+      from { background-position: 0 0; }
+      to   { background-position: -40px 0; }
+    }
+
+    /* Capybara Image */
+    .capy {
+      position: absolute;
+      left: 70px;
+      bottom: 42px;
+      width: 80px;
+      height: auto;
+      image-rendering: pixelated;
+      transform: translateY(0);
+      pointer-events: none;
+    }
+
+    /* Obstacles */
+    .obstacle {
+      position: absolute;
+      bottom: 42px;
+      width: 28px; height: 28px;
+      background: #2b6930;
+      border-radius: 50% 50% 40% 40%;
+      box-shadow: inset -4px -4px rgba(0,0,0,0.2);
+    }
+
+    /* HUD */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+    }
+    .stat {
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Buttons */
+    .btn {
+      margin: 5px;
+      padding: 10px 22px;
+      font-size: 16px;
+      border-radius: 10px;
+      background: #1e3c72;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .btn:hover {
+      background: #2a5298;
+      transform: translateY(-2px);
+    }
+
+    .overlay {
+      position:absolute; inset:0;
+      display:none;
+      align-items:center; justify-content:center;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(2px);
+      color:#fff;
+      font-weight:700; font-size:24px;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+    }
+    .overlay.show { display:flex; flex-direction:column; gap:10px; }
+  </style>
+</head>
+<body>
+  <h1>🐹 Jumping Capybara</h1>
+
+  <div class="game-wrap">
+    <div id="world" class="world" aria-label="Game world" role="application">
+      <div class="sun"></div>
+      <div class="cloud" style="top:40px; animation-delay:0s;"></div>
+      <div class="cloud" style="top:80px; animation-delay:20s; transform:scale(0.8);"></div>
+      <div class="cloud" style="top:120px; animation-delay:40s; transform:scale(0.6);"></div>
+      <div class="mountains"></div>
+      <div class="track" id="track"></div>
+
+      <!-- Player -->
+      <img id="capy" src="assets/capy.png" alt="Capybara" class="capy" aria-hidden="true">
+
+      <!-- Overlay -->
+      <div id="overlay" class="overlay">
+        <div id="message">Tap / Press Space to start</div>
+        <small>Controls: Space / ↑ / Click / Tap — R: Restart</small>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="stat" id="score">Score: 0</div>
+      <div class="stat" id="best">Best: 0</div>
+      <div>
+        <button class="btn" id="restartBtn">🔄 Restart</button>
+        <button class="btn" id="exitBtn">🚪 Exit to Hub</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="capybara.js"></script>
+  <script>
+    document.getElementById('exitBtn').onclick = () => location.href = '../index.html';
+    document.getElementById('restartBtn').onclick = () => window.CapybaraGame && window.CapybaraGame.restart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Match</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #1f1c2c, #928DAB);
+      color: white;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.4);
+    }
+
+    .grid {
+      display: grid;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 90vw;
+    }
+
+    .card {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: attr(data-icon);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      color: transparent;
+      transition: color 0.3s ease;
+    }
+
+    @media (hover: hover) {
+      .card:hover {
+        transform: scale(1.05);
+        background: rgba(255,255,255,0.15);
+        box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+      }
+    }
+
+    .card.flipped {
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    .card.flipped::after {
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255,255,255,0.6);
+    }
+
+    #controls, #gameUI {
+      margin: 20px 0;
+    }
+
+    #controls button, #exitBtn, #restartBtn {
+      margin: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+    }
+
+    #controls button:hover, #exitBtn:hover, #restartBtn:hover {
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      transform: translateY(-2px);
+      box-shadow: 0px 6px 10px rgba(0,0,0,0.3);
+    }
+
+    #gameUI {
+      display: none;
+    }
+
+    #status {
+      font-size: 1.4rem;
+      margin-top: 10px;
+      text-shadow: 0 0 6px rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <h1>Memory Match</h1>
+
+  <!-- Difficulty Selection -->
+  <div id="controls">
+    <h3>Select Difficulty</h3>
+    <button onclick="startGame('easy')">Easy</button>
+    <button onclick="startGame('medium')">Medium</button>
+    <button onclick="startGame('hard')">Hard</button>
+  </div>
+
+  <!-- Game UI -->
+  <div id="gameUI">
+    <div class="grid" id="grid"></div>
+    <p id="timer">⏱ Time: 0s</p>
+    <p id="bestTime">🏆 Best Time: N/A</p>
+    <p id="status"></p>
+    <button id="restartBtn" onclick="restart()">🔄 Restart</button>
+    <button id="exitBtn" onclick="exitGame()">🚪 Exit to Hub</button>
+  </div>
+  
+  <script src="memory.js"></script>
+</body>
+</html>

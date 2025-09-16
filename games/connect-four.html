@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Connect Four</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    :root{
+      --cell-size: clamp(44px, 11vw, 70px);
+      --gap-size: clamp(4px, 1vw, 6px);
+      --board-pad: clamp(6px, 1.3vw, 10px);
+      --radius-lg: 16px;
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:#fff;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height:100svh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      padding:16px;
+      text-align:center;
+    }
+    h1{ margin:12px 0 0; font-size:clamp(22px, 5vw, 36px); }
+    .panel{
+      width:min(980px, 100%);
+      background:rgba(255,255,255,0.06);
+      backdrop-filter: blur(6px);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-lg);
+      padding:14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+    .stack{ display:grid; gap:12px; }
+    .row{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; align-items:center; }
+    label{ font-size:14px; opacity:0.9; }
+    input[type="text"], select{
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.2);
+      background:rgba(0,0,0,0.2);
+      color:#fff;
+      min-width:200px;
+      outline:none;
+    }
+    .btn{
+      appearance:none; border:none; cursor:pointer; color:#fff;
+      background:#1e3c72; padding:10px 16px; border-radius:12px; font-weight:600;
+      transition:transform .06s ease, background .2s ease, opacity .2s ease;
+    }
+    .btn:hover{ background:#2a5298; }
+    .btn:active{ transform:translateY(1px); }
+    .btn.secondary{ background:transparent; border:1px solid rgba(255,255,255,0.25); }
+    .choices{ display:flex; gap:10px; align-items:center; justify-content:center; }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.18);
+      cursor:pointer; user-select:none;
+    }
+    .chip input{ accent-color:#2a5298; }
+    .board-wrapper{
+      position: relative;
+      width: 100%;
+      max-width: 100vw; /* ✅ Prevent overflow on mobile */
+      margin-inline: auto;
+      display: flex;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .board{
+      display: grid;
+      grid-template-columns: repeat(7, var(--cell-size));
+      grid-template-rows: repeat(6, var(--cell-size));
+      gap: var(--gap-size);
+      justify-content: center;
+      margin-top: 10px;
+      background: #0f2027;
+      padding: var(--board-pad);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: visible; /* allow the overshoot/bounce to be visible */
+
+      width: fit-content;
+      max-width: 100%; /* ✅ Keep inside screen */
+      box-sizing: border-box;
+    }
+    .cell{
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border-radius:50%;
+      background:#203a43;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      box-shadow: inset 0 4px 8px rgba(0,0,0,0.38);
+      position:relative;
+      overflow:hidden;
+    }
+    .red{ background: radial-gradient(ellipse at 30% 30%, #ff6b6b, #d90429); }
+    .yellow{ background: radial-gradient(ellipse at 30% 30%, #fff06b, #f0c400); }
+    .falling{
+      position:absolute; width: var(--cell-size); height: var(--cell-size);
+      border-radius:50%; pointer-events:none; z-index:10;
+      box-shadow: inset 0 4px 8px rgba(0,0,0,0.38);
+      will-change: top, left;
+    }
+    #gameUI{ display:none; }
+    #status{ min-height:1.6em; margin:8px 0; font-weight:700; }
+    .toolbar{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    /* Compact tweaks for phones */
+    @media (max-width: 480px){
+      .row{ gap:8px; }
+      input[type="text"], select{ min-width:160px; font-size:14px; }
+      .btn{ padding:10px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Connect Four</h1>
+
+  <!-- Mode Selection -->
+  <div id="modeSelect" class="panel stack">
+    <div class="row">
+      <button class="btn" onclick="showSetup('pvp')">👥 Multiplayer</button>
+      <button class="btn" onclick="showSetup('ai')">🤖 Vs AI</button>
+    </div>
+
+    <!-- PvP Setup -->
+    <div id="setupPvP" class="stack" style="display:none;">
+      <h3>Multiplayer Setup</h3>
+      <div class="row">
+        <label>
+          Player 1 Name
+          <input id="p1Name" type="text" placeholder="Player 1" />
+        </label>
+        <label>
+          Player 2 Name
+          <input id="p2Name" type="text" placeholder="Player 2" />
+        </label>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="applySetupAndStart('pvp')">Start Game</button>
+        <button class="btn secondary" onclick="hideSetups()">Cancel</button>
+      </div>
+    </div>
+
+
+    <!-- AI Setup -->
+    <div id="setupAI" class="stack" style="display:none;">
+      <h3>Vs AI Setup</h3>
+      <div class="row">
+        <label>
+          Your Name
+          <input id="humanName" type="text" placeholder="You" />
+        </label>
+        <label>
+          AI Name
+          <input id="aiName" type="text" placeholder="CPU" />
+        </label>
+      </div>
+      <div class="row">
+        <span>Your Color:</span>
+        <div class="choices" role="group" aria-label="Human color">
+          <label class="chip"><input type="radio" name="humanColor" value="red" checked /> 🔴 Red</label>
+          <label class="chip"><input type="radio" name="humanColor" value="yellow" /> 🟡 Yellow</label>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="applySetupAndStart('ai')">Start Game</button>
+        <button class="btn secondary" onclick="hideSetups()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game UI -->
+  <div id="gameUI" class="panel stack">
+    <div class="board-wrapper">
+      <div class="board" id="board" aria-label="Connect Four board"></div>
+    </div>
+    <p id="status" aria-live="polite"></p>
+    <div class="toolbar">
+      <button class="btn" onclick="restart()">🔄 Restart</button>
+      <button class="btn secondary" onclick="exitGame()">🚪 Exit to Hub</button>
+    </div>
+  </div>
+
+  <script src="connect-four.js"></script>
+</body>
+</html>

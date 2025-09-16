@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    body {
+      text-align: center;
+    }
+    .game-container {
+      position: relative;
+      display: inline-block;
+      margin-top: 20px;
+    }
+    canvas {
+      background: #0f2027;
+      border: 3px solid #1e3c72;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+      outline: none;
+      width: 400px;
+      height: 400px;
+      max-width: 95vw;
+      max-height: 95vw;
+    }
+
+    /* ✅ Overlay when game over */
+    .overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .overlay button {
+      width: 150px;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #1e3c72;
+      color: white;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+      transition: 0.2s;
+    }
+    .overlay button:active {
+      background: #2a5298;
+      transform: scale(0.95);
+    }
+
+    #gameUI { display: none; }
+    #status, #scoreBoard {
+      margin: 5px;
+      font-size: 18px;
+    }
+
+    /* ✅ Mobile Controls */
+    .controls-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    .controls {
+      display: none; /* hidden until toggle */
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .control-row {
+      display: flex;
+      gap: 10px;
+    }
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      font-size: 22px;
+      font-weight: bold;
+      background: #1e3c72;
+      color: white;
+      border: none;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .control-btn:active {
+      background: #2a5298;
+      transform: scale(0.95);
+    }
+
+    .game-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #1e3c72;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+      transition: 0.2s;
+    }
+    .game-btn:active {
+      background: #2a5298;
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <h1>Snake Game 🐍</h1>
+
+  <!-- Mode Select -->
+  <div id="modeSelect">
+    <h3>Start Snake Game</h3>
+    <button class="game-btn" onclick="startGame()">▶ Play</button>
+  </div>
+
+  <!-- Game UI -->
+  <div id="gameUI">
+    <!-- ✅ Status on top -->
+    <p id="scoreBoard">Score: 0 | Best: 0</p>
+    <p id="status">Use Arrow Keys or Mobile Buttons</p>
+
+    <div class="game-container">
+      <canvas id="gameCanvas" width="400" height="400" tabindex="0"></canvas>
+
+      <!-- ✅ Game Over Overlay -->
+      <div id="gameOverOverlay" class="overlay">
+        <p style="color:white; font-size:20px; font-weight:bold;" id="finalMessage"></p>
+        <button onclick="restart()">🔄 Restart</button>
+        <button onclick="exitGame()">🚪 Exit to Hub</button>
+      </div>
+    </div>
+
+    <!-- ✅ Mobile Controls Section -->
+    <div class="controls-container">
+      <button class="game-btn" onclick="toggleMobile()">📱 Toggle Mobile Controls</button>
+      <div id="mobileControls" class="controls">
+        <button class="control-btn" onclick="setDirection('UP')">⬆</button>
+        <div class="control-row">
+          <button class="control-btn" onclick="setDirection('LEFT')">⬅</button>
+          <button class="control-btn" onclick="setDirection('RIGHT')">➡</button>
+        </div>
+        <button class="control-btn" onclick="setDirection('DOWN')">⬇</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="snake.js"></script>
+  <script>
+    // ✅ Toggle Mobile Controls
+    function toggleMobile() {
+      const controls = document.getElementById("mobileControls");
+      controls.style.display = (controls.style.display === "flex") ? "none" : "flex";
+    }
+  </script>
+</body>
+</html>
